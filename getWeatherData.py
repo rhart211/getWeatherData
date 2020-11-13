@@ -104,35 +104,61 @@ def request_station_data(log, access_token, default_device_id):
     response = requests.post("https://api.netatmo.com/api/getstationsdata", params=params, headers=headers)
     response.raise_for_status()
     indoor_data = response.json()['body']['devices'][0]['dashboard_data']
-    indoor_rem = ['min_temp', 'max_temp', 'date_max_temp', 'date_min_temp', 'temp_trend', 'pressure_trend']
+    indoor_rem = ['min_temp', 'max_temp', 'date_max_temp', 'date_min_temp']
     [indoor_data.pop(key) for key in indoor_rem]
     indoor_data['wifi_status'] = response.json()['body']['devices'][0]['wifi_status']
+    indoor_data['altitude'] = response.json()['body']['devices'][0]['place']['altitude']
+    indoor_data['timezone'] = response.json()['body']['devices'][0]['place']['timezone']
+    indoor_data['indoor_temp_trend'] = indoor_data.pop('temp_trend')
+    indoor_data['indoor_pressure_trend'] = indoor_data.pop('pressure_trend')
+    indoor_data['indoor_Temperature'] = indoor_data.pop('Temperature')
+    indoor_data['indoor_Humidity'] = indoor_data.pop('Humidity')
+
     log.debug(indoor_data)
 
     outdoor_data = response.json()['body']['devices'][0]['modules'][0]['dashboard_data']
-    outdoor_rem = ['min_temp', 'max_temp', 'date_max_temp', 'date_min_temp', 'temp_trend']
+    outdoor_rem = ['min_temp', 'max_temp', 'date_max_temp', 'date_min_temp']
     [outdoor_data.pop(key) for key in outdoor_rem]
     outdoor_data['battery_percent'] = response.json()['body']['devices'][0]['modules'][0]['battery_percent']
     outdoor_data['battery_vp'] = response.json()['body']['devices'][0]['modules'][0]['battery_vp']
     outdoor_data['rf_status'] = response.json()['body']['devices'][0]['modules'][0]['rf_status']
+    outdoor_data['outdoor_temp_trend'] = outdoor_data.pop('temp_trend')
+    outdoor_data['outdoor_Temperature'] = outdoor_data.pop('Temperature')
+    outdoor_data['outdoor_Humidity'] = outdoor_data.pop('Humidity')
     log.debug(outdoor_data)
 
     return indoor_data, outdoor_data
 
 def toInfluxFormat(log, module_name, sensor_type, time_utc, measurement):
 
-    json_body = [
-        {
-            "measurement": module_name,
-            "tags": {
-                "sensor_type": sensor_type,
-            },
-            "time": datetime.fromtimestamp(time_utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "fields": {
-                "value": float(measurement)
+    if isinstance(measurement, str):
+        json_body = [
+            {
+                "measurement": sensor_type,
+                "tags": {
+                    "sensor": module_name,
+                },
+                "time": datetime.fromtimestamp(time_utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "fields": {
+                    "value": str(measurement)
+                }
             }
-        }
-    ]
+        ]
+
+    else:
+        json_body = [
+            {
+                "measurement": sensor_type,
+                "tags": {
+                    "sensor_type": module_name,
+                },
+                "time": datetime.fromtimestamp(time_utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "fields": {
+                    "value": float(measurement)
+                }
+            }
+        ]
+
     log.debug(json_body)
 
     return json_body
