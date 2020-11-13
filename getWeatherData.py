@@ -6,7 +6,7 @@ from influxdb import InfluxDBClient
 from datetime import datetime
 
 
-def create_logger(DEFAULT_LOGGING='info'):
+def create_logger(LOG_FILE, DEFAULT_LOGGING='info'):
     """
     configure the client logging
     """
@@ -14,7 +14,7 @@ def create_logger(DEFAULT_LOGGING='info'):
     logging.basicConfig(format=FORMAT)
     log = logging.getLogger()
     main_base = os.path.dirname(__file__)
-    LOGFILE = os.path.join(main_base, 'getWeatherData.log')
+    LOGFILE = os.path.join(main_base, LOG_FILE)
     file_hdlr = logging.FileHandler(LOGFILE)
     file_format = logging.Formatter(FORMAT)
     file_hdlr.setFormatter(file_format)
@@ -23,15 +23,17 @@ def create_logger(DEFAULT_LOGGING='info'):
     log.setLevel(numeric_level)
     return log
 
-def read_config():
+def read_config(CONFIG_FILE):
     """
     Load Credentials and Configuration from Config
     """
     main_base = os.path.dirname(__file__)
-    DEFAULT_CONFIG = os.path.join(main_base, "config")
+    DEFAULT_CONFIG = os.path.join(main_base, CONFIG_FILE)
 
     config = configparser.ConfigParser()
     config.read(DEFAULT_CONFIG)
+
+    log_file = config['global']['logfile']
 
     try:
         netatmo_auth = (
@@ -56,7 +58,7 @@ def read_config():
     except:
         influx_auth(None, None, None, None, None)
 
-    return netatmo_auth, influx_auth, default_device_id
+    return log_file, netatmo_auth, influx_auth, default_device_id
 
 def generate_access_token(log, auth):
     """
@@ -146,8 +148,8 @@ def write_points(log, module_name, sensor_data, influx_client):
 
 def main():
     requests.packages.urllib3.disable_warnings()
-    log = create_logger('debug')
-    netatmo_auth, influx_auth, default_device_id = read_config()
+    log_file, netatmo_auth, influx_auth, default_device_id = read_config('config')
+    log = create_logger(log_file, 'debug')
     access_token = generate_access_token(log, netatmo_auth)
     indoor_data, outdoor_data = request_station_data(log, access_token, default_device_id)
     influx_client = InfluxDBClient(influx_auth[0], influx_auth[1], influx_auth[2], influx_auth[3], influx_auth[4], ssl=True)
