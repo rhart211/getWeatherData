@@ -1,0 +1,16 @@
+[global]
+logfile = LOG_FILENAME
+
+[netatmo]
+client_id = NETATMO_CLIENT_ID
+client_secret = NETATMO_CLIENT_SECRET
+username = NETATMO_USER
+password = NETATMO_PASSWORD
+default_device_id = NETATMO_STATION_ID
+
+[influxdb]
+host = INFXLUDB_HOST
+port = INFLUXDB_PORT
+user = INFLUXDB_USER
+password = INFLUXDB_PASSWORD
+dbname = INFLUXDB_DATABASE_NAME
