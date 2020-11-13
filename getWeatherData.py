@@ -102,13 +102,17 @@ def request_station_data(log, access_token, default_device_id):
     response = requests.post("https://api.netatmo.com/api/getstationsdata", params=params, headers=headers)
     response.raise_for_status()
     indoor_data = response.json()['body']['devices'][0]['dashboard_data']
-    indoor_rem = ['AbsolutePressure', 'min_temp', 'max_temp', 'date_max_temp', 'date_min_temp', 'temp_trend', 'pressure_trend']
+    indoor_rem = ['min_temp', 'max_temp', 'date_max_temp', 'date_min_temp', 'temp_trend', 'pressure_trend']
     [indoor_data.pop(key) for key in indoor_rem]
+    indoor_data['wifi_status'] = response.json()['body']['devices'][0]['wifi_status']
     log.debug(indoor_data)
 
     outdoor_data = response.json()['body']['devices'][0]['modules'][0]['dashboard_data']
     outdoor_rem = ['min_temp', 'max_temp', 'date_max_temp', 'date_min_temp', 'temp_trend']
     [outdoor_data.pop(key) for key in outdoor_rem]
+    outdoor_data['battery_percent'] = response.json()['body']['devices'][0]['modules'][0]['battery_percent']
+    outdoor_data['battery_vp'] = response.json()['body']['devices'][0]['modules'][0]['battery_vp']
+    outdoor_data['rf_status'] = response.json()['body']['devices'][0]['modules'][0]['rf_status']
     log.debug(outdoor_data)
 
     return indoor_data, outdoor_data
