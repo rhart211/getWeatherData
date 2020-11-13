@@ -109,6 +109,7 @@ def request_station_data(log, access_token, default_device_id):
     indoor_data['wifi_status'] = response.json()['body']['devices'][0]['wifi_status']
     indoor_data['altitude'] = response.json()['body']['devices'][0]['place']['altitude']
     indoor_data['timezone'] = response.json()['body']['devices'][0]['place']['timezone']
+    indoor_data['station'] = response.json()['body']['devices'][0]['home_name']
     indoor_data['indoor_temp_trend'] = indoor_data.pop('temp_trend')
     indoor_data['indoor_pressure_trend'] = indoor_data.pop('pressure_trend')
     indoor_data['indoor_Temperature'] = indoor_data.pop('Temperature')
