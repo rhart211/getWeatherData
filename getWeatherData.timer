@@ -1,0 +1,8 @@
+[Unit]
+Description=Get Weather Data from Netatmo every 10 minutes
+[Timer]
+OnBootSec=10
+OnUnitActiveSec=600
+AccuracySec=1
+[Install]
+WantedBy=timers.target

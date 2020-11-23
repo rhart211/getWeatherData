@@ -1,0 +1,4 @@
+[Unit]
+Description=Get Weather Data from Netatmo
+[Service]
+ExecStart=/home/rhart/venv/weather3/bin/python3 /home/rhart/getWeatherData/getWeatherData.py
