@@ -104,13 +104,19 @@ def request_station_data(log, access_token, default_device_id):
     response = requests.post("https://api.netatmo.com/api/getstationsdata", params=params, headers=headers)
     response.raise_for_status()
     indoor_data = response.json()['body']['devices'][0]['dashboard_data']
-    indoor_rem = ['min_temp', 'max_temp', 'date_max_temp', 'date_min_temp']
-    [indoor_data.pop(key) for key in indoor_rem]
+    
+    # 30Nov2020 Netatmo removed the following measurements from the data provided by the API
+    #indoor_rem = ['min_temp', 'max_temp', 'date_max_temp', 'date_min_temp']
+    #[indoor_data.pop(key) for key in indoor_rem]
+
     indoor_data['wifi_status'] = response.json()['body']['devices'][0]['wifi_status']
     indoor_data['altitude'] = response.json()['body']['devices'][0]['place']['altitude']
     indoor_data['timezone'] = response.json()['body']['devices'][0]['place']['timezone']
     indoor_data['station'] = response.json()['body']['devices'][0]['home_name']
-    indoor_data['indoor_temp_trend'] = indoor_data.pop('temp_trend')
+    
+    # 30Nov2020 Netatmo removed Temperature Trend data for both the Station and the Outdoor modules
+    #indoor_data['indoor_temp_trend'] = indoor_data.pop('temp_trend')
+
     indoor_data['indoor_pressure_trend'] = indoor_data.pop('pressure_trend')
     indoor_data['indoor_Temperature'] = indoor_data.pop('Temperature')
     indoor_data['indoor_Humidity'] = indoor_data.pop('Humidity')
@@ -123,7 +129,10 @@ def request_station_data(log, access_token, default_device_id):
     outdoor_data['battery_percent'] = response.json()['body']['devices'][0]['modules'][0]['battery_percent']
     outdoor_data['battery_vp'] = response.json()['body']['devices'][0]['modules'][0]['battery_vp']
     outdoor_data['rf_status'] = response.json()['body']['devices'][0]['modules'][0]['rf_status']
-    outdoor_data['outdoor_temp_trend'] = outdoor_data.pop('temp_trend')
+    
+    # 30Nov2020 Netatmo removed Temperature Trend data for both the Station and the Outdoor modules
+    #outdoor_data['outdoor_temp_trend'] = outdoor_data.pop('temp_trend')
+
     outdoor_data['outdoor_Temperature'] = outdoor_data.pop('Temperature')
     outdoor_data['outdoor_Humidity'] = outdoor_data.pop('Humidity')
     log.debug(outdoor_data)
